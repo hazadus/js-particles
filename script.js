@@ -1,6 +1,6 @@
 const PARTICLES_QTY = 100;
 const PARTICLE_MIN_RADIUS = 15;
-const PARTICLES_MAX_CONNECT_DISTANCE = 100;
+const PARTICLES_MAX_CONNECT_DISTANCE = 200;
 const PARTICLES_BOUNCE = false; // Set to `true` to bounce particles off each other
 
 class Particle {
@@ -94,10 +94,14 @@ class Effect {
         const distance = Math.hypot(dx, dy);
 
         if (distance < PARTICLES_MAX_CONNECT_DISTANCE) {
+          context.save();
+          const opacity = 1 - distance / PARTICLES_MAX_CONNECT_DISTANCE;
+          context.globalAlpha = opacity;
           context.beginPath();
           context.moveTo(this.particles[i].x, this.particles[i].y);
           context.lineTo(this.particles[j].x, this.particles[j].y);
           context.stroke();
+          context.restore();
         }
 
         if (PARTICLES_BOUNCE) {

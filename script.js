@@ -10,6 +10,8 @@ class Particle {
     this.radius = PARTICLE_MIN_RADIUS + Math.random() * 10;
     this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
     this.y = this.radius + Math.random() * (this.effect.height - this.radius * 2);
+    this.vx = 1 + Math.random();
+    this.vy = 1 + Math.random();
   }
 
   draw(context) {
@@ -21,7 +23,11 @@ class Particle {
   }
 
   update() {
-    this.x++;
+    this.x += this.vx;
+    this.y += this.vy;
+    // Bounce particle off canvas borders:
+    if (this.x >= this.effect.width - this.radius || this.x <= this.radius) this.vx *= -1;
+    if (this.y >= this.effect.height - this.radius || this.y <= this.radius) this.vy *= -1;
   }
 }
 

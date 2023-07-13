@@ -1,5 +1,7 @@
-const PARTICLE_MIN_RADIUS = 15;
 const PARTICLES_QTY = 80;
+const PARTICLE_MIN_RADIUS = 15;
+const PARTICLES_MAX_CONNECT_DISTANCE = 100;
+const PARTICLES_BOUNCE = false; // Set to `true` to bounce particles off each other
 
 class Particle {
   constructor(effect) {
@@ -28,6 +30,14 @@ class Particle {
     if (this.x >= this.effect.width - this.radius || this.x <= this.radius) this.vx *= -1;
     if (this.y >= this.effect.height - this.radius || this.y <= this.radius) this.vy *= -1;
   }
+
+  intersectsWith(otherParticle) {
+    const dx = this.x - otherParticle.x;
+    const dy = this.y - otherParticle.y;
+    const distance = Math.hypot(dx, dy);
+    const maxDistance = this.radius + otherParticle.radius;
+    return distance <= maxDistance + 1;
+  }
 }
 
 class Effect {
@@ -41,8 +51,30 @@ class Effect {
   }
 
   createParticles() {
-    for (let i = 0; i < this.numberOfParticles; i++) {
-      this.particles.push(new Particle(this));
+    if (PARTICLES_BOUNCE) {
+      // Create non-intersecting particles
+      while (this.particles.length <= PARTICLES_QTY) {
+        let particle = new Particle(this);
+
+        // Check intersections
+        let intersectionsCount = 0;
+        for (let i = 0; i < this.particles.length; i++) {
+          if (particle.intersectsWith(this.particles[i])) {
+            intersectionsCount++;
+            break;
+          }
+        }
+
+        if (!intersectionsCount) {
+          this.particles.push(particle);
+          console.log(this.particles);
+        }
+      }
+    } else {
+      // Do not care about particle intersections:
+      for (let i = 0; i < this.numberOfParticles; i++) {
+        this.particles.push(new Particle(this));
+      }
     }
   }
 
@@ -51,6 +83,25 @@ class Effect {
       particle.draw(context);
       particle.update();
     });
+  }
+
+  connectAndBounceParticles() {
+    for (let i = 0; i < this.particles.length; i++) {
+      for (let j = i; j < this.particles.length; j++) {
+        const dx = this.particles[i].x - this.particles[j].x;
+        const dy = this.particles[i].y - this.particles[j].y;
+        const distance = Math.hypot(dx, dy);
+
+        if (PARTICLES_BOUNCE) {
+          if (this.particles[i].intersectsWith(this.particles[j])) {
+            this.particles[i].vx *= -1;
+            this.particles[i].vy *= -1;
+            this.particles[j].vx *= -1;
+            this.particles[j].vy *= -1;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -73,6 +124,7 @@ const effect = new Effect(canvas);
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   effect.handleParticles(ctx);
+  effect.connectAndBounceParticles();
   requestAnimationFrame(animate);
 }
 

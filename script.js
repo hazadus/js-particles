@@ -1,5 +1,5 @@
-const PARTICLE_RADIUS = 15;
-const PARTICLES_QTY = 40;
+const PARTICLE_MIN_RADIUS = 15;
+const PARTICLES_QTY = 80;
 
 const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
@@ -7,15 +7,21 @@ const ctx = canvas.getContext("2d");
 class Particle {
   constructor(effect) {
     this.effect = effect;
-    this.x = Math.random() * this.effect.width;
-    this.y = Math.random() * this.effect.height;
-    this.radius = PARTICLE_RADIUS;
+    this.radius = PARTICLE_MIN_RADIUS + Math.random() * 10;
+    this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
+    this.y = this.radius + Math.random() * (this.effect.height - this.radius * 2);
   }
 
   draw(context) {
+    // Hue - Saturation - Lightness
+    context.fillStyle = `hsl(${this.x * 0.5}, 100%, 50%)`;
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.fill();
+  }
+
+  update() {
+    this.x++;
   }
 }
 
@@ -36,16 +42,25 @@ class Effect {
   }
 
   handleParticles(context) {
-    this.particles.forEach((particle) => particle.draw(context));
+    this.particles.forEach((particle) => {
+      particle.draw(context);
+      particle.update();
+    });
   }
 }
 
-function animate() {}
-
-// Entry point
+// Configure
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 ctx.fillStyle = "blue";
 
 const effect = new Effect(canvas);
-effect.handleParticles(ctx);
+
+// Entry point
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  effect.handleParticles(ctx);
+  requestAnimationFrame(animate);
+}
+
+animate();

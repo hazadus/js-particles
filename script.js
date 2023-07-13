@@ -1,22 +1,21 @@
 const PARTICLE_MIN_RADIUS = 15;
 const PARTICLES_QTY = 80;
 
-const canvas = document.getElementById("canvas1");
-const ctx = canvas.getContext("2d");
-
 class Particle {
   constructor(effect) {
     this.effect = effect;
     this.radius = PARTICLE_MIN_RADIUS + Math.random() * 10;
     this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
     this.y = this.radius + Math.random() * (this.effect.height - this.radius * 2);
-    this.vx = 1 + Math.random();
-    this.vy = 1 + Math.random();
+    this.vx = 4 * Math.random() - 2;
+    this.vx += this.vx > 0 ? 0.5 : -0.5;
+    this.vy = 4 * Math.random() - 2;
+    this.vy += this.vy > 0 ? 0.5 : -0.5;
   }
 
   draw(context) {
     // Hue - Saturation - Lightness
-    context.fillStyle = `hsl(${this.x * 0.5}, 100%, 50%)`;
+    // context.fillStyle = `hsl(${this.x * 0.5}, 100%, 50%)`;
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.fill();
@@ -56,9 +55,17 @@ class Effect {
 }
 
 // Configure
+const canvas = document.getElementById("canvas1");
+const ctx = canvas.getContext("2d");
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-ctx.fillStyle = "blue";
+
+const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+gradient.addColorStop(0, "white");
+gradient.addColorStop(0.5, "magenta");
+gradient.addColorStop(1, "blue");
+ctx.fillStyle = gradient;
 
 const effect = new Effect(canvas);
 

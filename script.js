@@ -30,6 +30,7 @@ class Particle {
 
   update() {
     if (this.effect.mouse.pressed) {
+      // Interact with the mouse
       const dx = this.x - this.effect.mouse.x;
       const dy = this.y - this.effect.mouse.y;
       const distance = Math.hypot(dx, dy);
@@ -47,9 +48,23 @@ class Particle {
 
     this.x += this.vx;
     this.y += this.vy;
-    // Bounce particle off canvas borders:
-    if (this.x >= this.effect.width - this.radius || this.x <= this.radius) this.vx *= -1;
-    if (this.y >= this.effect.height - this.radius || this.y <= this.radius) this.vy *= -1;
+
+    // Bounce particle off canvas borders, preventing pushing out of boundaries:
+    if (this.x < this.radius) {
+      this.x = this.radius;
+      this.vx *= -1;
+    } else if (this.x > this.effect.width - this.radius) {
+      this.x = this.effect.width - this.radius;
+      this.vx *= -1;
+    }
+
+    if (this.y < this.radius) {
+      this.y = this.radius;
+      this.vy *= -1;
+    } else if (this.y > this.effect.height - this.radius) {
+      this.y = this.effect.height - this.radius;
+      this.vy *= -1;
+    }
   }
 
   intersectsWith(otherParticle) {

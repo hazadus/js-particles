@@ -12,3 +12,4 @@ Click on the canvas to push particles.
 - [MDN - Canvas tutorial](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial)
 - [MDN - CSS hsl() function](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl)
 - [MDN - window.requestAnimationFrame()](https://developer.mozilla.org/ru/docs/Web/API/window/requestAnimationFrame)
+- [MDN - CanvasRenderingContext2D: createLinearGradient() method](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/createLinearGradient)

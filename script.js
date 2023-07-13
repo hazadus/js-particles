@@ -2,11 +2,13 @@ const PARTICLES_QTY = 150;
 const PARTICLE_MIN_RADIUS = 10;
 const PARTICLES_MAX_CONNECT_DISTANCE = 200;
 const PARTICLES_BOUNCE = false; // Set to `true` to bounce particles off each other
+const SUNRAY_EVERY_NTH_PARTICLE = 5;
 const MOUSE_RADIUS = 200;
 
 class Particle {
-  constructor(effect) {
+  constructor(effect, index) {
     this.effect = effect;
+    this.index = index;
     this.radius = Math.floor(PARTICLE_MIN_RADIUS + Math.random() * 10);
     this.resetPosition();
 
@@ -28,6 +30,24 @@ class Particle {
   }
 
   draw(context) {
+    // Conntect every Nth particle with the mouse cursor (`sunrays` effect):
+    if (this.index % SUNRAY_EVERY_NTH_PARTICLE == 0) {
+      context.save();
+      context.globalAlpha = 0.4;
+      context.beginPath();
+      context.moveTo(this.x, this.y);
+      context.lineTo(this.effect.mouse.x, this.effect.mouse.y);
+
+      const gradient = context.createLinearGradient(this.x, this.y, this.effect.mouse.x, this.effect.mouse.y);
+      gradient.addColorStop(0, "gold");
+      gradient.addColorStop(1, "white");
+
+      context.strokeStyle = gradient;
+      context.lineWidth = 1;
+      context.stroke();
+      context.restore();
+    }
+
     // Hue - Saturation - Lightness
     // context.fillStyle = `hsl(${this.x * 0.5}, 100%, 50%)`;
     context.beginPath();
@@ -97,8 +117,8 @@ class Effect {
     this.createParticles();
 
     this.mouse = {
-      x: 0,
-      y: 0,
+      x: Math.floor(this.width / 2),
+      y: Math.floor(this.height / 2),
       pressed: false,
       radius: MOUSE_RADIUS,
     };
@@ -148,7 +168,7 @@ class Effect {
     if (PARTICLES_BOUNCE) {
       // Create non-intersecting particles
       while (this.particles.length <= PARTICLES_QTY) {
-        let particle = new Particle(this);
+        let particle = new Particle(this, this.particles.length + 1);
 
         // Check intersections
         let intersectionsCount = 0;
@@ -167,7 +187,7 @@ class Effect {
     } else {
       // Do not care about particle intersections:
       for (let i = 0; i < this.numberOfParticles; i++) {
-        this.particles.push(new Particle(this));
+        this.particles.push(new Particle(this, i));
       }
     }
   }

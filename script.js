@@ -7,12 +7,16 @@ class Particle {
   constructor(effect) {
     this.effect = effect;
     this.radius = PARTICLE_MIN_RADIUS + Math.random() * 10;
-    this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
-    this.y = this.radius + Math.random() * (this.effect.height - this.radius * 2);
+    this.resetPosition();
     this.vx = 4 * Math.random() - 2;
     this.vx += this.vx > 0 ? 0.5 : -0.5;
     this.vy = 4 * Math.random() - 2;
     this.vy += this.vy > 0 ? 0.5 : -0.5;
+  }
+
+  resetPosition() {
+    this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
+    this.y = this.radius + Math.random() * (this.effect.height - this.radius * 2);
   }
 
   draw(context) {
@@ -48,6 +52,32 @@ class Effect {
     this.particles = [];
     this.numberOfParticles = PARTICLES_QTY;
     this.createParticles();
+
+    window.addEventListener("resize", (event) => {
+      this.resize(event.target.window.innerWidth, event.target.window.innerHeight);
+    });
+  }
+
+  configureContext() {
+    const ctx = this.canvas.getContext("2d");
+    const gradient = ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+    gradient.addColorStop(0, "white");
+    gradient.addColorStop(0.5, "magenta");
+    gradient.addColorStop(1, "blue");
+    ctx.fillStyle = gradient;
+    ctx.strokeStyle = "white";
+  }
+
+  resize(newWidth, newHeight) {
+    this.canvas.width = newWidth;
+    this.canvas.height = newHeight;
+    this.width = newWidth;
+    this.height = newHeight;
+    // Context is reset to defaults when resized, so we need to re-configure
+    // it each time we change the size:
+    this.configureContext();
+    // Redistribute particles to fit new area:
+    this.particles.forEach((particle) => particle.resetPosition());
   }
 
   createParticles() {
@@ -119,22 +149,15 @@ class Effect {
 
 // Configure
 const canvas = document.getElementById("canvas1");
-const ctx = canvas.getContext("2d");
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-gradient.addColorStop(0, "white");
-gradient.addColorStop(0.5, "magenta");
-gradient.addColorStop(1, "blue");
-ctx.fillStyle = gradient;
-ctx.strokeStyle = "white";
-
 const effect = new Effect(canvas);
+effect.configureContext();
 
 // Entry point
 function animate() {
+  const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   effect.handleParticles(ctx);
   requestAnimationFrame(animate);

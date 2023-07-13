@@ -169,6 +169,15 @@ class Effect {
     });
   }
 
+  handleFPS(context, timestamp) {
+    // Calculate and print FPS
+    this._fps = Math.round(1000 / (timestamp - this._prevTimestamp));
+    this._prevTimestamp = timestamp;
+
+    context.font = "normal 12pt Courier";
+    context.fillText(this._fps + " fps", 8, 16);
+  }
+
   connectAndBounceParticles(context) {
     for (let i = 0; i < this.particles.length; i++) {
       for (let j = i; j < this.particles.length; j++) {
@@ -209,11 +218,12 @@ const effect = new Effect(canvas);
 effect.configureContext();
 
 // Entry point
-function animate() {
+function animate(timestamp) {
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   effect.handleParticles(ctx);
-  requestAnimationFrame(animate);
+  effect.handleFPS(ctx, timestamp);
+  window.requestAnimationFrame(animate);
 }
 
-animate();
+window.requestAnimationFrame(animate);

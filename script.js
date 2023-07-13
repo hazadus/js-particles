@@ -33,6 +33,9 @@ class Particle {
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.fill();
+    context.strokeStyle = "black";
+    context.lineWidth = 1;
+    context.stroke();
   }
 
   update() {
@@ -200,6 +203,8 @@ class Effect {
           context.beginPath();
           context.moveTo(this.particles[i].x, this.particles[i].y);
           context.lineTo(this.particles[j].x, this.particles[j].y);
+          context.strokeStyle = "white";
+          context.lineWidth = 1;
           context.stroke();
           context.restore();
         }

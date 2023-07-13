@@ -1,7 +1,8 @@
-const PARTICLES_QTY = 100;
-const PARTICLE_MIN_RADIUS = 15;
+const PARTICLES_QTY = 150;
+const PARTICLE_MIN_RADIUS = 10;
 const PARTICLES_MAX_CONNECT_DISTANCE = 200;
 const PARTICLES_BOUNCE = false; // Set to `true` to bounce particles off each other
+const MOUSE_RADIUS = 200;
 
 class Particle {
   constructor(effect) {
@@ -28,6 +29,22 @@ class Particle {
   }
 
   update() {
+    if (this.effect.mouse.pressed) {
+      const dx = this.x - this.effect.mouse.x;
+      const dy = this.y - this.effect.mouse.y;
+      const distance = Math.hypot(dx, dy);
+      const force = this.effect.mouse.radius / distance;
+
+      if (distance < this.effect.mouse.radius) {
+        // `atan2()` gives us the counterclockwise angle in radians, between the positive
+        // x-axis and a line projected from point (0,0) towards specific x and y coordinates
+        // (target point). It returns a value in the range [-pi...pi] radians.
+        const angle = Math.atan2(dy, dx);
+        this.x += Math.cos(angle) * 2 * force;
+        this.y += Math.sin(angle) * 2 * force;
+      }
+    }
+
     this.x += this.vx;
     this.y += this.vy;
     // Bounce particle off canvas borders:
@@ -53,8 +70,29 @@ class Effect {
     this.numberOfParticles = PARTICLES_QTY;
     this.createParticles();
 
+    this.mouse = {
+      x: 0,
+      y: 0,
+      pressed: false,
+      radius: MOUSE_RADIUS,
+    };
+
     window.addEventListener("resize", (event) => {
       this.resize(event.target.window.innerWidth, event.target.window.innerHeight);
+    });
+    window.addEventListener("mousemove", (event) => {
+      if (this.mouse.pressed) {
+        this.mouse.x = event.x;
+        this.mouse.y = event.y;
+      }
+    });
+    window.addEventListener("mousedown", (event) => {
+      this.mouse.pressed = true;
+      this.mouse.x = event.x;
+      this.mouse.y = event.y;
+    });
+    window.addEventListener("mouseup", (event) => {
+      this.mouse.pressed = false;
     });
   }
 

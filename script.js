@@ -7,12 +7,19 @@ const MOUSE_RADIUS = 200;
 class Particle {
   constructor(effect) {
     this.effect = effect;
-    this.radius = PARTICLE_MIN_RADIUS + Math.random() * 10;
+    this.radius = Math.floor(PARTICLE_MIN_RADIUS + Math.random() * 10);
     this.resetPosition();
+
+    // Horizontal and vertical speed:
     this.vx = 4 * Math.random() - 2;
     this.vx += this.vx > 0 ? 0.5 : -0.5;
     this.vy = 4 * Math.random() - 2;
     this.vy += this.vy > 0 ? 0.5 : -0.5;
+
+    // `Push` speed and friction, used while interacting with the mouse:
+    this.pushX = 0;
+    this.pushY = 0;
+    this.friction = 0.85; // Must be less than 1.
   }
 
   resetPosition() {
@@ -41,13 +48,14 @@ class Particle {
         // x-axis and a line projected from point (0,0) towards specific x and y coordinates
         // (target point). It returns a value in the range [-pi...pi] radians.
         const angle = Math.atan2(dy, dx);
-        this.x += Math.cos(angle) * 2 * force;
-        this.y += Math.sin(angle) * 2 * force;
+        this.pushX += Math.cos(angle) * 2 * force;
+        this.pushY += Math.sin(angle) * 2 * force;
       }
     }
 
-    this.x += this.vx;
-    this.y += this.vy;
+    // NB: Friction is less than 1, so it will continuously lower push speed on each update:
+    this.x += this.vx + (this.pushX *= this.friction);
+    this.y += this.vy + (this.pushY *= this.friction);
 
     // Bounce particle off canvas borders, preventing pushing out of boundaries:
     if (this.x < this.radius) {

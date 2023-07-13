@@ -1,4 +1,4 @@
-const PARTICLES_QTY = 80;
+const PARTICLES_QTY = 100;
 const PARTICLE_MIN_RADIUS = 15;
 const PARTICLES_MAX_CONNECT_DISTANCE = 100;
 const PARTICLES_BOUNCE = false; // Set to `true` to bounce particles off each other
@@ -79,18 +79,26 @@ class Effect {
   }
 
   handleParticles(context) {
+    this.connectAndBounceParticles(context);
     this.particles.forEach((particle) => {
       particle.draw(context);
       particle.update();
     });
   }
 
-  connectAndBounceParticles() {
+  connectAndBounceParticles(context) {
     for (let i = 0; i < this.particles.length; i++) {
       for (let j = i; j < this.particles.length; j++) {
         const dx = this.particles[i].x - this.particles[j].x;
         const dy = this.particles[i].y - this.particles[j].y;
         const distance = Math.hypot(dx, dy);
+
+        if (distance < PARTICLES_MAX_CONNECT_DISTANCE) {
+          context.beginPath();
+          context.moveTo(this.particles[i].x, this.particles[i].y);
+          context.lineTo(this.particles[j].x, this.particles[j].y);
+          context.stroke();
+        }
 
         if (PARTICLES_BOUNCE) {
           if (this.particles[i].intersectsWith(this.particles[j])) {
@@ -117,6 +125,7 @@ gradient.addColorStop(0, "white");
 gradient.addColorStop(0.5, "magenta");
 gradient.addColorStop(1, "blue");
 ctx.fillStyle = gradient;
+ctx.strokeStyle = "white";
 
 const effect = new Effect(canvas);
 
@@ -124,7 +133,6 @@ const effect = new Effect(canvas);
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   effect.handleParticles(ctx);
-  effect.connectAndBounceParticles();
   requestAnimationFrame(animate);
 }
 
